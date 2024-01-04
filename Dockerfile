@@ -12,7 +12,7 @@ RUN go build -o main
 # Expose the port your API listens on
 EXPOSE 8080
 
-ENV MONGODB_URI="mongodb+srv://admin:admin@fxrate.73lrkis.mongodb.net/"
+ENV MONGODB_URI="mongodb+srv://<username>:<pwd>@domain.mongodb.net/"
 
 # Command to run your application
 CMD ["./main"]
