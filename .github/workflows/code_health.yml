@@ -1,0 +1,55 @@
+name: 'Code Health'
+on:
+  push:
+   branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: 'go.mod'
+
+      - name: Build
+        run: |
+          go build -v ./...
+
+      - name: Test
+        run: go test -v ./...
+
+      - name: 'Docker Login'
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Build the frontend image and push it to ACR
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: |
+            aciadrdevcontainer.azurecr.io/fx-api-go:${{ github.sha }} 
+            aciadrdevcontainer.azurecr.io/fx-api-go:latest
+          file: Dockerfile
+#  golangci-lint:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v4
+#      - name: Install Go
+#        uses: actions/setup-go@v4
+#        with:
+#          go-version: ${{ env.GO_VERSION }}
+#      - name: lint
+#        uses: golangci/golangci-lint-action@v3.7.0
+#        with:
+#          version: latest
+#          # skip cache because of flaky behaviors
+#          skip-build-cache: true
+#          skip-pkg-cache: true
